@@ -54,6 +54,6 @@ struct Exception final : std::runtime_error
     }
 };
 
-#define check_st_( st ){ STATUS _status = st; if ( FAILED( st ) ) throw Exception( st ); }
+#define check_st_( st ){ STATUS _status = st; if ( FAILED( _status ) ) throw Exception( _status ); }
 
 #endif
