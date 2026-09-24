@@ -14,6 +14,14 @@ add_executable(ContiguousListsSample
     sample.cpp
     contiguouslists.c )
 
+
+
+target_compile_definitions(LinkedListsSample PRIVATE
+        LINKED_LISTS )
+
+target_compile_definitions(ContiguousListsSample PRIVATE
+        CONTIGUOUS_LISTS )
+
 target_include_directories(LinkedListsTests PRIVATE
     ${PROJECT_SOURCE_DIR}/include )
 
