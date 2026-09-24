@@ -7,7 +7,7 @@
  * Unauthorized copying, distribution, or modification is prohibited.
  */
 
-#include "../include/util.h"
+#include <utils.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -29,7 +29,7 @@ typedef struct _SimpleByteArray
     size_t capacity;
 } SimpleByteArray;
 
-STATUS SimpleByteArray_init( SimpleByteArray *out_list );
+STATUS SimpleByteArray_init( SimpleByteArray **out_list );
 STATUS SimpleByteArray_free( SimpleByteArray *in_list );
 STATUS SimpleByteArray_insert( SimpleByteArray *list, size_t index, BYTE value );
 STATUS SimpleByteArray_insert_bytes( SimpleByteArray *list, size_t index, const BYTE *values, size_t count );
@@ -38,32 +38,36 @@ STATUS SimpleByteArray_get( const SimpleByteArray *list, size_t index, BYTE *val
 STATUS SimpleByteArray_size( const SimpleByteArray *list, size_t *value );
 
 /* initialization */
-STATUS SimpleByteArray_init( SimpleByteArray *out_list )
+STATUS SimpleByteArray_init( SimpleByteArray **out_list )
 {
+    SimpleByteArray *newList = NULL;
+
     if ( !out_list )
     {
         printf("SimpleByteArray_init: out_list is nullptr!\n");
         return POINTER;
     }
 
-    // prevent memory leaks
-    if ( out_list->capacity )
+    newList = (SimpleByteArray *)calloc( 1, sizeof(SimpleByteArray) );
+    if ( !newList )
     {
-        printf("SimpleByteArray_init: out_list has already been initialized!\n");
-        return ILLEGAL_METHOD_CALL;
+        printf("SimpleByteArray_init: failed to allocate list.\n");
+        return OUTOFMEMORY;
     }
 
-    out_list->array = NULL;
-    out_list->size = 0;
-    out_list->capacity = 1;
+    newList->array = NULL;
+    newList->size = 0;
+    newList->capacity = 1;
 
     // sizeof( *list->array ) is mainly for re-using code later on.
-    out_list->array = (PBYTE)malloc( out_list->capacity * sizeof( *out_list->array ) );
-    if ( !out_list->array )
+    newList->array = (PBYTE)malloc( newList->capacity * sizeof( *newList->array ) );
+    if ( !newList->array )
     {
         printf("SimpleByteArray_init: failed to allocate list array!\n");
         return OUTOFMEMORY;
     }
+
+    *out_list = newList;
 
     return SUCCESS;
 }
@@ -87,6 +91,8 @@ STATUS SimpleByteArray_free( SimpleByteArray *in_list )
     in_list->capacity = 0;
     free( (void *)in_list->array );
     in_list->array = NULL;
+
+    free( in_list );
 
     return SUCCESS;
 }
