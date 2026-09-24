@@ -1,8 +1,8 @@
-add_executable(LinkedLists
+add_executable(LinkedListsTests
     tester.c
     linkedlists.c )
 
-add_executable(ContiguousLists
+add_executable(ContiguousListsTests
     tester.c
     contiguouslists.c )
 

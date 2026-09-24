@@ -111,7 +111,7 @@ static void test_empty_list()
     expect_ok( "free", SimpleByteArray_free( list ) );
 }
 
-static void test_single_element(void)
+static void test_single_element()
 {
     SimpleByteArray *list = NULL;
     BYTE expected[] = { 'A' };
@@ -138,7 +138,7 @@ static void test_single_element(void)
 }
 
 /* Insertions */
-static void test_head_tail_insertions(void)
+static void test_head_tail_insertions()
 {
     SimpleByteArray *list = NULL;
     BYTE expected[] = { 'X', 'A', 'Y', 'B', 'C' };
