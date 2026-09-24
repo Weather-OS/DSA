@@ -28,5 +28,32 @@ typedef enum _STATUS
     ILLEGAL_STATE_CHANGE = 332,
 } STATUS;
 
-#define FAILED(st) ((STATUS)(st) < 0)
+#define FAILED(st) ((STATUS)(st) > 0)
 #define RETURN_IF_FAILED(st) do { STATUS __stRet = st; if (FAILED(__stRet)) { return st; }} while (0)
+
+
+#ifdef __cplusplus
+
+#include <stdexcept>
+#include <string>
+#include <iostream>
+
+struct Exception final : std::runtime_error
+{
+    STATUS status;
+    std::string msg;
+
+    explicit Exception( STATUS s ): std::runtime_error( "Unhandled Exception: " + std::to_string(s) ), status(s)
+    {
+        std::printf( "Exception %d within C++ code.\n", status );
+    }
+
+    explicit Exception( STATUS s, const std::string &message ): std::runtime_error( "Unhandled Exception: " + std::to_string(s) + " with message " + message ), status(s), msg(message)
+    {
+        std::printf( "Exception %d within C++ code with message \"%s\".\n", status, message.c_str() );
+    }
+};
+
+#define check_hr_( hr ){ HRESULT st = hr; if ( FAILED( hr ) ) throw Exception( st ); }
+
+#endif
