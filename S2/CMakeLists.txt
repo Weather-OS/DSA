@@ -14,6 +14,14 @@ add_executable(ManualStack_ContiguousStacks
         ../S1/linkedlists.c
         manualstack.cpp )
 
+add_executable(ManualQueue_LinkedStacks
+        ../S1/linkedlists.c
+        manualqueue.cpp )
+
+add_executable(ManualQueue_ContiguousStacks
+        ../S1/linkedlists.c
+        manualqueue.cpp )
+
 target_compile_definitions(BracketTester_LinkedStacks PRIVATE
         LINKED_LISTS )
 
@@ -24,4 +32,10 @@ target_compile_definitions(ManualStack_LinkedStacks PRIVATE
         LINKED_LISTS )
 
 target_compile_definitions(ManualStack_ContiguousStacks PRIVATE
+        CONTIGUOUS_LISTS )
+
+target_compile_definitions(ManualQueue_LinkedStacks PRIVATE
+        LINKED_LISTS )
+
+target_compile_definitions(ManualQueue_ContiguousStacks PRIVATE
         CONTIGUOUS_LISTS )
