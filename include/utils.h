@@ -47,12 +47,12 @@ struct Exception final : std::runtime_error
 
     explicit Exception( STATUS s ): std::runtime_error( "Unhandled Exception: " + std::to_string(s) ), status(s)
     {
-        std::printf( "Exception %d within C++ code.\n", status );
+        //std::printf( "Exception %d within C++ code.\n", status );
     }
 
     explicit Exception( STATUS s, const std::string &message ): std::runtime_error( "Unhandled Exception: " + std::to_string(s) + " with message " + message ), status(s), msg(message)
     {
-        std::printf( "Exception %d within C++ code with message \"%s\".\n", status, message.c_str() );
+        //std::printf( "Exception %d within C++ code with message \"%s\".\n", status, message.c_str() );
     }
 };
 
