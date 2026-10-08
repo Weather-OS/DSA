@@ -32,7 +32,8 @@ public:
     {
         // For byte arrays, T needs to be trivially copyable.
         // Things like interfaces, mutated classes or ref counted objects cannot be copied!
-        static_assert( std::is_trivially_copyable_v<T> );
+        if constexpr ( !std::is_same_v<T, std::string> ) //Serialized strings implementation
+            static_assert( std::is_trivially_copyable_v<T> );
         check_st_( SimpleByteArray_init( &m_array ) );
     }
 
@@ -44,17 +45,45 @@ public:
     void
     Insert( size_t index, T const &value )
     {
-        check_st_( SimpleByteArray_insert_bytes( m_array, index * sizeof(T), reinterpret_cast<const BYTE *>(&value), sizeof(T) ) );
+        if constexpr ( std::is_same_v<T, std::string> )
+        {
+            const size_t byte_index = StringByteIndex( index );
+            const size_t length = value.size();
+
+            check_st_( SimpleByteArray_insert_bytes( m_array, byte_index, reinterpret_cast<const BYTE*>(&length), sizeof(length) ) );
+
+            if ( length != 0 )
+                check_st_( SimpleByteArray_insert_bytes( m_array, byte_index + sizeof(length), reinterpret_cast<const BYTE*>(value.data()), length ) );
+        }
+        else
+            check_st_( SimpleByteArray_insert_bytes( m_array, index * sizeof(T), reinterpret_cast<const BYTE*>(&value), sizeof(T) ) );
     }
 
     void
     Remove( size_t index )
     {
+        size_t byte_index;
         size_t iterator;
-        const size_t byte_index = index * sizeof(T);
 
-        for ( iterator = 0; iterator < sizeof(T); iterator++ )
-            check_st_( SimpleByteArray_remove( m_array, byte_index, nullptr ) );
+        if constexpr ( std::is_same_v<T, std::string> )
+        {
+            size_t length{};
+            size_t total_size;
+
+            byte_index = StringByteIndex( index );
+            GetBytes( byte_index, &length, sizeof(length) );
+            total_size = sizeof(length) + length;
+
+            for ( iterator = 0; iterator < total_size; iterator++ )
+                check_st_( SimpleByteArray_remove( m_array, byte_index, nullptr ) );
+        }
+        else
+        {
+            byte_index = index * sizeof(T);
+
+            for ( iterator = 0; iterator < sizeof(T); iterator++ )
+                check_st_( SimpleByteArray_remove( m_array, byte_index, nullptr ) );
+        }
     }
 
     T
@@ -62,22 +91,60 @@ public:
     {
         T value{};
         size_t iterator;
-        const size_t byte_index = index * sizeof(T);
-        BYTE* bytes = reinterpret_cast<BYTE*>(&value);
+        size_t byte_index;
+        BYTE* bytes;
 
-        for ( iterator = 0; iterator < sizeof(T); iterator++ )
-            check_st_( SimpleByteArray_get( m_array, byte_index + iterator, &bytes[iterator] ) );
+        if constexpr ( std::is_same_v<T, std::string> )
+        {
+            size_t length{};
 
-        return value;
+            byte_index = StringByteIndex( index );
+            GetBytes( byte_index, &length, sizeof(length) );
+
+            value = std::string(length, '\0');
+
+            if ( length != 0 )
+                GetBytes( byte_index + sizeof(length), value.data(), length);
+
+            return value;
+        }
+        else
+        {
+            bytes = reinterpret_cast<BYTE*>(&value);
+            byte_index = index * sizeof(T);
+
+            for ( iterator = 0; iterator < sizeof(T); iterator++ )
+                check_st_( SimpleByteArray_get( m_array, byte_index + iterator, &bytes[iterator] ) );
+
+            return value;
+        }
     }
 
     size_t
     Size() const
     {
         size_t byte_size{};
-        check_st_( SimpleByteArray_size( m_array, &byte_size ) );
 
-        return byte_size / sizeof(T);
+        if constexpr ( std::is_same_v<T, std::string> )
+        {
+            size_t count = 0;
+            size_t byte_index = 0;
+            size_t length{};
+            check_st_( SimpleByteArray_size( m_array, &byte_size ) );
+
+            while ( byte_index < byte_size )
+            {
+                GetBytes( byte_index, &length, sizeof(length) );
+                byte_index += sizeof(length) + length;
+                ++count;
+            }
+            return count;
+        }
+        else
+        {
+            check_st_( SimpleByteArray_size( m_array, &byte_size ) );
+            return byte_size / sizeof(T);
+        }
     }
 
     // push front
@@ -87,6 +154,39 @@ public:
     }
 
 private:
+    void
+    GetBytes( size_t byte_index, void* destination, size_t size ) const
+    {
+        BYTE* bytes = static_cast<BYTE*>(destination);
+        size_t iterator;
+
+        for ( iterator = 0; iterator < size; iterator++ )
+            check_st_( SimpleByteArray_get( m_array, byte_index + iterator, &bytes[iterator] ) );
+    }
+
+    size_t
+    StringByteIndex( size_t index ) const
+    {
+        size_t current_index = 0;
+        size_t byte_index = 0;
+        size_t byte_size{};
+        size_t length{};
+
+        check_st_( SimpleByteArray_size( m_array, &byte_size ) );
+        while ( current_index < index )
+        {
+            if ( byte_index >= byte_size )
+                throw Exception( BOUNDS );
+
+            GetBytes( byte_index, &length, sizeof(length) );
+
+            byte_index += sizeof(length) + length;
+            ++current_index;
+        }
+
+        return byte_index;
+    }
+
     SimpleByteArray *m_array{ nullptr };
 };
 
