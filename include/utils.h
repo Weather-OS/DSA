@@ -23,13 +23,15 @@ typedef enum _STATUS
     NOTIMPL = 213,
     NOINIT = 214,
     BOUNDS = 280,
+    STACK_UNDERFLOW = 299,
+    STACK_OVERFLOW = 300,
     ILLEGAL_METHOD_CALL = 310,
     ILLEGAL_DELEGATE_ASSIGNMENT = 311,
     ILLEGAL_STATE_CHANGE = 332,
 } STATUS;
 
 #define FAILED(st) ((STATUS)(st) > 0)
-#define RETURN_IF_FAILED(st) do { STATUS __stRet = st; if (FAILED(__stRet)) { return st; }} while (0)
+#define RETURN_IF_FAILED(st) do { STATUS __stRet = st; if (FAILED(__stRet)) { return __stRet; }} while (0)
 
 
 #ifdef __cplusplus

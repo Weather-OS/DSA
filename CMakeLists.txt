@@ -8,4 +8,6 @@ set( CMAKE_C_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_C_EXTENSIONS OFF )
 
+include_directories( ${PROJECT_SOURCE_DIR}/include )
 add_subdirectory( S1 )
+add_subdirectory( S2 )
