@@ -20,52 +20,22 @@ public:
     SimpleQueue() = default;
     ~SimpleQueue() = default;
 
-#ifdef CONTIGUOUS_LISTS
-    size_t
-    Size() const
-    {
-        if ( iback < ifront )
-            return 0;
-
-        return iback - ifront + 1;
-    }
-#endif
-
     void
     Push( T const &value )
     {
-#ifdef LINKED_LISTS
         this->Insert( this->Size(), value );
-
-#elif defined( CONTIGUOUS_LISTS )
-        iback++;
-        this->Insert( iback, value );
-#endif
     }
 
     T
     Pop()
     {
-        T value{};
-
         if ( this->Size() == 0 )
             throw Exception( STACK_UNDERFLOW );
 
-#ifdef LINKED_LISTS
-        value = this->Get( 0 );
+        T value = this->Get( 0 );
         this->Remove( 0 );
-        return value;
-#elif defined( CONTIGUOUS_LISTS )
-        value = this->Get( ifront++ );
-
-        if ( ifront > iback )
-        {
-            ifront = 0;
-            iback  = -1;
-        }
 
         return value;
-#endif
     }
 
     T
@@ -74,19 +44,8 @@ public:
         if ( this->Size() == 0 )
             throw Exception( STACK_UNDERFLOW );
 
-#ifdef LINKED_LISTS
         return this->Get( 0 );
-
-#elif defined( CONTIGUOUS_LISTS )
-        return this->Get( ifront );
-#endif
     }
-
-private:
-#ifdef CONTIGUOUS_LISTS
-    int ifront = 0;
-    int iback  = -1;
-#endif
 };
 
 #endif //DSA_SIMPLEQUEUE_HPP
