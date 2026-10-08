@@ -1,5 +1,5 @@
 /**
-* Proprietary Source-Available License.
+ * Proprietary Source-Available License.
  *
  * Copyright (c) 2026 Weather. All Rights Reserved.
  *
@@ -51,7 +51,7 @@ constexpr std::string_view to_string( Operation op )
 int main()
 {
     long numOperations;
-    SimpleStack<long> stack{};
+    SimpleStack<std::string> stack{};
     SimpleQueue<std::string> results{};
     std::string user_input{};
     std::string operation{};
@@ -84,12 +84,12 @@ int main()
 
         if ( operation == to_string( Operation::Push ) )
         {
-            stack.Push( std::stol( value.c_str() ) );
+            stack.Push( value );
         } else if ( operation == to_string( Operation::Pop ) )
         {
             try
             {
-                results.Push( std::to_string( stack.Pop() ) );
+                results.Push( stack.Pop() );
             } catch ( Exception &e )
             {
                 results.Push( "EMPTY" );
@@ -98,10 +98,9 @@ int main()
         {
             try
             {
-                results.Push( std::to_string( stack.Top() ) );
+                results.Push( stack.Top() );
             } catch ( Exception &e )
             {
-                // set EMPTY operations to be min long because of trivial copy limits.
                 results.Push( "EMPTY" );
             }
         } else if ( operation == to_string( Operation::Size ) )
