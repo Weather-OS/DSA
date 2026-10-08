@@ -121,6 +121,30 @@ public:
     }
 
     size_t
+    Find( T const &value ) const
+    {
+        size_t iterator;
+
+        for ( iterator = 0; iterator < Size(); iterator++ )
+        {
+            if constexpr ( std::is_same_v<T, std::string> )
+            {
+                if ( Get( iterator ) == value )
+                    return iterator;
+            }
+            else
+            {
+                T current = Get( iterator );
+
+                if ( std::memcmp( &current, &value, sizeof(T) ) == 0 )
+                    return iterator;
+            }
+        }
+
+        throw Exception( BOUNDS );
+    }
+
+    size_t
     Size() const
     {
         size_t byte_size{};
