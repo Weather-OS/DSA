@@ -15,8 +15,6 @@ class SimpleStack :
     public SimpleArray<T>
 {
 public:
-    using list = SimpleArray<T>;
-
     SimpleStack() = default;
     ~SimpleStack() = default;
 
@@ -28,16 +26,28 @@ public:
         if ( this->Size() == 0 )
             throw Exception( STACK_UNDERFLOW );
 
+#ifdef LINKED_LISTS
+        // Top operations are faster
         value = this->Get( 0 );
         this->Remove( 0 );
-
+#elif defined( CONTIGUOUS_LISTS )
+        // Bottom operations are faster
+        value = this->Get( this->Size() - 1 );
+        this->Remove( this->Size() - 1 );
+#endif
         return value;
     }
 
     void
     Push( T const &value )
     {
+#ifdef LINKED_LISTS
+        // Top operations are faster
         *this << value;
+#elif defined( CONTIGUOUS_LISTS )
+        // Bottom operations are faster
+        this->Insert( this->Size(), value );
+#endif
     }
 
     T
@@ -45,8 +55,11 @@ public:
     {
         if ( this->Size() == 0 )
             throw Exception( STACK_UNDERFLOW );
-
+#ifdef LINKED_LISTS
         return this->Get( 0 );
+#elif defined( CONTIGUOUS_LISTS )
+        return this->Get( this->Size() - 1 );
+#endif
     }
 };
 
