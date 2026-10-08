@@ -153,6 +153,11 @@ public:
         Insert( 0, value );
     }
 
+    T operator [] ( size_t index ) const
+    {
+        return Get( index );
+    }
+
 private:
     void
     GetBytes( size_t byte_index, void* destination, size_t size ) const
