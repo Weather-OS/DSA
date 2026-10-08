@@ -7,18 +7,30 @@
  * Unauthorized copying, distribution, or modification is prohibited.
  */
 
-#ifndef DSA_SIMPLESTACK_HPP
-#define DSA_SIMPLESTACK_HPP
+#ifndef DSA_SIMPLEQUEUE_HPP
+#define DSA_SIMPLEQUEUE_HPP
 
 #include "S1/simplearray.hpp"
 
 template <typename T>
-class SimpleStack :
+class SimpleQueue :
     public SimpleArray<T>
 {
 public:
-    SimpleStack() = default;
-    ~SimpleStack() = default;
+    SimpleQueue() = default;
+    ~SimpleQueue() = default;
+
+    void
+    Push( T const &value )
+    {
+#ifdef LINKED_LISTS
+        this->Insert( this->Size(), value );
+
+#elif defined( CONTIGUOUS_LISTS )
+        iback++;
+        this->Insert( iback, value );
+#endif
+    }
 
     T
     Pop()
@@ -29,40 +41,43 @@ public:
             throw Exception( STACK_UNDERFLOW );
 
 #ifdef LINKED_LISTS
-        // Top operations are faster
         value = this->Get( 0 );
         this->Remove( 0 );
-#elif defined( CONTIGUOUS_LISTS )
-        // Bottom operations are faster
-        value = this->Get( this->Size() - 1 );
-        this->Remove( this->Size() - 1 );
-#endif
         return value;
-    }
-
-    void
-    Push( T const &value )
-    {
-#ifdef LINKED_LISTS
-        // Top operations are faster
-        *this << value;
 #elif defined( CONTIGUOUS_LISTS )
-        // Bottom operations are faster
-        this->Insert( this->Size(), value );
+        value = this->Get( ifront );
+
+        ifront++;
+
+        if ( ifront > iback )
+        {
+            ifront = 0;
+            iback  = -1;
+        }
+
+        return value;
 #endif
     }
 
     T
-    Top() const
+    Front() const
     {
         if ( this->Size() == 0 )
             throw Exception( STACK_UNDERFLOW );
+
 #ifdef LINKED_LISTS
         return this->Get( 0 );
+
 #elif defined( CONTIGUOUS_LISTS )
-        return this->Get( this->Size() - 1 );
+        return this->Get( ifront );
 #endif
     }
+
+private:
+#ifdef CONTIGUOUS_LISTS
+    int ifront = 0;
+    int iback  = -1;
+#endif
 };
 
-#endif //DSA_SIMPLESTACK_HPP
+#endif //DSA_SIMPLEQUEUE_HPP
