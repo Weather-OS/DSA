@@ -20,6 +20,17 @@ public:
     SimpleQueue() = default;
     ~SimpleQueue() = default;
 
+#ifdef CONTIGUOUS_LISTS
+    size_t
+    Size() const
+    {
+        if ( iback < ifront )
+            return 0;
+
+        return iback - ifront + 1;
+    }
+#endif
+
     void
     Push( T const &value )
     {
@@ -45,9 +56,7 @@ public:
         this->Remove( 0 );
         return value;
 #elif defined( CONTIGUOUS_LISTS )
-        value = this->Get( ifront );
-
-        ifront++;
+        value = this->Get( ifront++ );
 
         if ( ifront > iback )
         {
