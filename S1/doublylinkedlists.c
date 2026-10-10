@@ -118,14 +118,7 @@ STATUS SimpleByteArray_insert( SimpleByteArray *list, size_t index, BYTE value )
     newNode->next = NULL;
     newNode->previous = NULL;
 
-    if ( index == list->size )
-    {
-        // insert at tail
-        newNode->previous = list->tail;
-
-        list->tail->next = newNode;
-        list->tail = newNode;
-    } else if ( index == 0 )
+    if ( index == 0 )
     {
         //insert at head
         newNode->next = list->head;
@@ -136,6 +129,13 @@ STATUS SimpleByteArray_insert( SimpleByteArray *list, size_t index, BYTE value )
             list->tail = newNode;
 
         list->head = newNode;
+    } else if ( index == list->size )
+    {
+        // insert at tail
+        newNode->previous = list->tail;
+
+        list->tail->next = newNode;
+        list->tail = newNode;
     } else
     {
         current = list->head;
